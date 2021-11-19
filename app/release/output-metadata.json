@@ -1,0 +1,18 @@
+{
+  "version": 2,
+  "artifactType": {
+    "type": "APK",
+    "kind": "Directory"
+  },
+  "applicationId": "com.gx.app.gappxutils",
+  "variantName": "release",
+  "elements": [
+    {
+      "type": "SINGLE",
+      "filters": [],
+      "versionCode": 3,
+      "versionName": "3.0",
+      "outputFile": "Utils-Gappx_3.0_3_2021.11.19_11.26.23.apk"
+    }
+  ]
+}

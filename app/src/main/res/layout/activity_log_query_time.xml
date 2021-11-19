@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/smart_repotr_msg"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingTop="@dimen/dp_10">
+
+        <TextView
+            android:id="@+id/app_log_tv_top"
+            android:layout_width="@dimen/dp_40"
+            android:layout_height="@dimen/dp_40"
+            android:layout_marginStart="@dimen/dp_20"
+            android:background="@drawable/app_log_qurey_bar_listview"
+            android:gravity="center"
+            android:text="top"
+            android:textColor="#ffffff"
+            android:textSize="@dimen/dp_14" />
+
+        <ImageView
+            android:id="@+id/app_log_tv_rehhse"
+            android:layout_width="@dimen/dp_40"
+            android:layout_height="@dimen/dp_40"
+            android:layout_marginStart="@dimen/dp_20"
+            android:background="@drawable/app_log_qurey_bar_listview"
+            android:src="@drawable/ic_app_refresh_log"
+            app:tint="#ffffff" />
+
+        <TextView
+            android:id="@+id/app_log_tv_sum"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyleview_repotr_msg"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="16dp" />
+
+
+        <com.gx.app.gappxutils.BarListView
+            android:id="@+id/app_log_bar_listview"
+            android:layout_width="@dimen/dp_50"
+            android:layout_height="match_parent"
+            android:layout_gravity="end" />
+
+    </FrameLayout>
+
+
+</LinearLayout>
