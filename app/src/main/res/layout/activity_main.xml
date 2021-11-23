@@ -12,6 +12,20 @@
         android:orientation="vertical"
         android:padding="10dp">
 
+
+        <Switch
+            android:id="@+id/switch1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:showText="true"
+            android:textColor="#ffffff"
+            android:textOff="测试服"
+            android:textOn="正式服"
+            android:textSize="@dimen/dp_14"
+            android:thumb="@drawable/ic_app_debug_thumb"
+            android:track="@drawable/ic_app_debug_track" />
+
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -35,6 +49,11 @@
             android:layout_height="wrap_content"
             android:onClick="queryfile"
             android:text="查看共享文件" />
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="testHttp"
+            android:text="测试网络" />
 
     </LinearLayout>
 </ScrollView>

@@ -12,6 +12,11 @@ import java.io.*
 class App : Application() {
     companion object {
         lateinit var mContext: Context
+
+        /**
+         * 是否测试版
+         */
+        var APP_DEBUG = true
     }
 
     override fun onCreate() {
@@ -62,7 +67,6 @@ fun main(args: Array<String>) {
  * 合并两个文件 并且进行排重
  */
 fun zip(oldFilePath: String, nameFile: String, finalFile: File): String {
-
 
 
     return finalFile.absolutePath

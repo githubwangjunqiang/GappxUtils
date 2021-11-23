@@ -36,6 +36,7 @@ class FileActivity : AppCompatActivity() {
         var isTest = true
         var packageNames = "com.gx.app.gappx.insidetest"
         fun startActivity(context: Context) {
+
             context.startActivity(Intent(context, FileActivity::class.java).apply {
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             })
@@ -47,6 +48,16 @@ class FileActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_file)
 
+        packageNames = if (App.APP_DEBUG) {
+            "com.gx.app.gappx.insidetest"
+        } else {
+            "com.gx.app.gappx"
+        }
+
+
+
+
+
         smartRefreshLayout = findViewById(R.id.file_shuaxin)
         listView = findViewById(R.id.tvpushcontent)
         mAistAdataer = ListAdataer(this)
@@ -54,11 +65,18 @@ class FileActivity : AppCompatActivity() {
         listView.adapter = mAistAdataer
 
 
-        var requestFileIntent = Intent(Intent.ACTION_PICK).apply {
-            type = "image/jpg"
-            `package` = packageNames
+        try {
+            var requestFileIntent = Intent(Intent.ACTION_PICK).apply {
+                type = "image/jpg"
+                `package` = packageNames
+            }
+            startActivityForResult(requestFileIntent, 1001)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            finish()
+            Toast.makeText(App.mContext, "打开失败", Toast.LENGTH_SHORT).show()
+            return
         }
-        startActivityForResult(requestFileIntent, 1001)
 
 
         smartRefreshLayout.setOnRefreshLoadMoreListener(object : OnRefreshLoadMoreListener {

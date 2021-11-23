@@ -34,17 +34,42 @@ object DataUtils {
     /**
      * 计时日志
      */
-    val time_log_uri = Uri.withAppendedPath(BASE_URI_TEST, "log")
+    var time_log_uri: Uri = Uri.parse("")
+        get() {
+            field = if (App.APP_DEBUG) {
+                Uri.withAppendedPath(BASE_URI_TEST, "log")
+            } else {
+                Uri.withAppendedPath(BASE_URI_APP, "log")
+            }
+            return field
+        }
 
     /**
      * 用户信息
      */
-    val userinfo_uri = Uri.withAppendedPath(BASE_URI_TEST, "user")
+    var userinfo_uri: Uri = Uri.parse("")
+        get() {
+            field = if (App.APP_DEBUG) {
+                Uri.withAppendedPath(BASE_URI_TEST, "user")
+            } else {
+                Uri.withAppendedPath(BASE_URI_APP, "user")
+            }
+            return field
+        }
+
 
     /**
      * 本地任务
      */
-    val task_uri = Uri.withAppendedPath(BASE_URI_TEST, "task")
+    var task_uri: Uri = Uri.parse("")
+        get() {
+            field = if (App.APP_DEBUG) {
+                Uri.withAppendedPath(BASE_URI_TEST, "task")
+            } else {
+                Uri.withAppendedPath(BASE_URI_APP, "task")
+            }
+            return field
+        }
 
     /**
      * 获取数据
