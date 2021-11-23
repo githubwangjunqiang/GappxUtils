@@ -3,7 +3,6 @@ package http
 import com.franmontiel.persistentcookiejar.PersistentCookieJar
 import com.franmontiel.persistentcookiejar.cache.SetCookieCache
 import com.google.gson.Gson
-import com.gx.app.gappxutils.utils.logd
 import http.exception.MyEmptyException
 import http.exception.MyHttpCodeException
 import http.exception.MyParsingException
@@ -38,8 +37,12 @@ object OkHttpUtils : IOkHttpUtils {
         createHttpClient(addTo)
     }
 
-    val mInterceptors: LinkedList<IMyInterceptor> by lazy {
+    val mInterceptors: LinkedList<IResultInterceptor> by lazy {
         LinkedList()
+    }
+
+    override fun addResultInterceptor(interceptor: IResultInterceptor) {
+        mInterceptors.add(interceptor)
     }
 
     override fun createHttpClient(addTo: ((builder: OkHttpClient.Builder) -> Unit)?): OkHttpClient {
@@ -143,7 +146,6 @@ private object Utils {
         e: Exception? = null
     ): String? {
         val iterator = OkHttpUtils.mInterceptors.iterator()
-        "iterator;${OkHttpUtils.mInterceptors.size}".logd()
         var string = value
         while (iterator.hasNext()) {
             val next = iterator.next()

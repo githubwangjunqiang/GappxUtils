@@ -9,6 +9,10 @@ import okhttp3.RequestBody
  * description: 网络管理接口
  */
 interface IOkHttpUtils {
+    /**
+     * 添加拦截器
+     */
+    fun addResultInterceptor(interceptor: IResultInterceptor)
 
     /**
      * 生成一个全局对象

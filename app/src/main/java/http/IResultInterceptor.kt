@@ -7,7 +7,7 @@ import java.lang.Exception
  * mailbox:980766134@qq.com
  * description: 自定义返回拦截器
  */
-interface IMyInterceptor {
+interface IResultInterceptor {
     /**
      * 拦截器 执行程序
      */

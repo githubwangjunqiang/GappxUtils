@@ -29,7 +29,7 @@ class MainActivity : AppCompatActivity() {
         OkHttpUtils.addTo = {
             it.addNetworkInterceptor(ParametricInterceptor())
         }
-        OkHttpUtils.mInterceptors.add(LogInterceptor())
+        OkHttpUtils.addResultInterceptor(LogInterceptor())
     }
 
     fun queryTimingLog(view: android.view.View) {

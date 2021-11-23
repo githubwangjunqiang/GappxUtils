@@ -1,7 +1,7 @@
 package http.utils
 
 import com.gx.app.gappxutils.utils.logd
-import http.IMyInterceptor
+import http.IResultInterceptor
 import http.exception.MyOkhttpException
 import http.Pool
 
@@ -10,7 +10,7 @@ import http.Pool
  * mailbox:980766134@qq.com
  * description: 自定义网络拦截器
  */
-class LogInterceptor : IMyInterceptor {
+class LogInterceptor : IResultInterceptor {
 
     override fun intercept(
         url: String,
