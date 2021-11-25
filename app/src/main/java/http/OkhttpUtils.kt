@@ -2,21 +2,20 @@ package http
 
 import com.franmontiel.persistentcookiejar.PersistentCookieJar
 import com.franmontiel.persistentcookiejar.cache.SetCookieCache
-import com.google.gson.Gson
-import http.exception.MyEmptyException
 import http.exception.MyHttpCodeException
-import http.exception.MyParsingException
-import http.exception.MyServiceCodeException
-import http.utils.ABDEC
+import http.utils.CallPool
+import http.utils.CallUtils
 import http.utils.DataStoreCookiePersistor
-import http.utils.GzipUtils
-import kotlinx.coroutines.*
-import okhttp3.*
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONObject
-import java.lang.Exception
 import java.util.*
 import java.util.concurrent.TimeUnit
 
@@ -57,7 +56,7 @@ object OkHttpUtils : IOkHttpUtils {
     }
 
     override fun postCall(url: String, body: RequestBody): String? {
-        var string: String? = null
+        var string: String?
         var client: OkHttpClient = okhttpManager
         val request = Request.Builder()
             .url(url)
@@ -65,7 +64,7 @@ object OkHttpUtils : IOkHttpUtils {
             .build()
         val newCall = client.newCall(request)
         val execute = newCall.execute()
-        if (execute.code == Pool.HTTP_OK) {
+        if (execute.code == CallPool.HTTP_OK) {
             string = execute.body?.string()
         } else {
             throw MyHttpCodeException(execute.code, execute.message)
@@ -86,7 +85,7 @@ object OkHttpUtils : IOkHttpUtils {
             .build()
         val newCall = client.newCall(request)
         val execute = newCall.execute()
-        if (execute.code == Pool.HTTP_OK) {
+        if (execute.code == CallPool.HTTP_OK) {
             string = execute.body?.string()
         } else {
             throw MyHttpCodeException(execute.code, execute.message)
@@ -96,145 +95,6 @@ object OkHttpUtils : IOkHttpUtils {
 
 
 }
-
-/**
- * 请求工具类
- */
-private object Utils {
-    /**
-     * 拉去请求
-     */
-    suspend fun <T> loadResult(
-        url: String,
-        body: RequestBody,
-        clazz: Class<T>?
-    ): T? {
-        var result = withContext(Dispatchers.IO) {
-            var string: String? = null
-            val nanoTime = System.currentTimeMillis()
-            try {
-                string = OkHttpUtils.postCall(url, body)
-                string = executionInterceptor(url, nanoTime, string)
-            } catch (e: Exception) {
-                executionInterceptor(url, nanoTime, string, e)
-                throw e
-            }
-
-            when {
-                clazz == null -> {
-                    null
-                }
-                string.isNullOrEmpty() -> {
-                    throw MyEmptyException()
-                }
-                else -> {
-                    string.testResults()
-                    string.analysisResult(clazz)
-                }
-            }
-        }
-        return result
-    }
-
-    /**
-     * 执行返回数据拦截器
-     */
-    fun executionInterceptor(
-        url: String,
-        startTime: Long,
-        value: String?,
-        e: Exception? = null
-    ): String? {
-        val iterator = OkHttpUtils.mInterceptors.iterator()
-        var string = value
-        while (iterator.hasNext()) {
-            val next = iterator.next()
-            try {
-                string = next.intercept(url, startTime, value, e)
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
-        return string
-    }
-
-    /**
-     * 解析结果
-     */
-    fun <T> String.analysisResult(clazz: Class<T>? = null): T? {
-
-        return clazz?.let {
-            try {
-                when (it) {
-                    String::class.java -> {
-                        this as T
-                    }
-                    Boolean::class.java -> {
-                        (this.toBooleanStrictOrNull() ?: false) as T
-                    }
-                    else -> {
-                        Gson().fromJson<T>(this, clazz)
-                    }
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-                throw MyParsingException(e)
-            }
-        }
-
-    }
-
-    /**
-     * 检查结果
-     */
-    fun String.testResults(): Boolean {
-
-        val jsonObject = JSONObject(this)
-
-        val code = jsonObject.optInt(Pool.HTTP_RETURN_CODE, Pool.HTTP_RETURN_CODE_SUCCESS)
-        var msg = jsonObject.optString(Pool.HTTP_RETURN_MSG, "")
-        if (code != Pool.HTTP_RETURN_CODE_SUCCESS) {
-            throw MyServiceCodeException(code, msg)
-        }
-        return true
-    }
-}
-
-/**
- * 常量池
- */
-object Pool {
-    /**
-     * 请求头 流 value
-     */
-    const val HEADER_STREAM_VALUE = "application/octet-stream"
-
-    /**
-     * 请求通用状态码 http 200
-     */
-    const val HTTP_OK = 200
-
-    /**
-     * 返回码的 key
-     */
-    const val HTTP_RETURN_CODE = "code"
-
-    /**
-     * 返回信息的 key
-     */
-    const val HTTP_RETURN_MSG = "msg"
-
-    /**
-     * 返回码的 key 成功值
-     */
-    const val HTTP_RETURN_CODE_SUCCESS = 0
-
-    /**
-     * 返回失败
-     */
-    const val HTTP_RETURN_CODE_ERROR = -1
-}
-
 
 /**
  *请求接口
@@ -248,7 +108,7 @@ suspend fun <T> String.postCall(
     val url = this
     var result: T? = null
     try {
-        result = Utils.loadResult(url, body, clazz)
+        result = CallUtils.loadResult(url, body, clazz)
     } catch (e: Exception) {
         e.printStackTrace()
         when (e) {
@@ -272,13 +132,10 @@ suspend fun <T> String.postCall(
 suspend fun JSONObject.loadRequestBody(): RequestBody {
     val jsonObject = this
     return withContext(Dispatchers.IO) {
-        val inGZip = GzipUtils.inGZip(jsonObject.toString().toByteArray())
-        val encrypt = try {
-            ABDEC.encrypt(inGZip)
-        } catch (e: Exception) {
-            e.printStackTrace()
-            "".toByteArray()
-        }
-        encrypt.toRequestBody(Pool.HEADER_STREAM_VALUE.toMediaTypeOrNull())
+        val inGZip = CallUtils.zip(jsonObject.toString().toByteArray())
+        val encrypt = CallUtils.aesData(inGZip)
+        encrypt.toRequestBody(CallPool.HEADER_STREAM_VALUE.toMediaTypeOrNull())
     }
 }
+
+
